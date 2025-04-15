@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>출입 기록 대시보드</title>
+</head>
+<body>
+  <h1>출입 기록</h1>
+  <button onclick="simulateTag()">태깅 시뮬레이션</button>
+  <ul id="logList"></ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded, limitToLast, query } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAlsUbVN-Mk7a6nyvrPWL4E1wILmIRsJB8",
+      authDomain: "taggingsystem-7e5b5.firebaseapp.com",
+      databaseURL: "https://taggingsystem-7e5b5-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "taggingsystem-7e5b5",
+      storageBucket: "taggingsystem-7e5b5.firebasestorage.app",
+      messagingSenderId: "100656078224",
+      appId: "1:100656078224:web:6c996fa74679c444cea715",
+      measurementId: "G-BWGB7W4QL8"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth();
+
+    // 익명 로그인
+    signInAnonymously(auth).catch(console.error);
+
+    // 태깅 시뮬레이션 함수
+    function simulateTag() {
+      const uid = "04A3B25F8C"; // 예시 카드 UID
+      const name = "곽하윤";
+      const location = "특수학급";
+      const time = new Date().toISOString();
+
+      const data = { uid, name, location, time };
+
+      // Firebase에 저장
+      push(ref(db, "logs"), data);
+    }
+
+    // 기록 출력
+    const logList = document.getElementById("logList");
+    const logsRef = query(ref(db, "logs"), limitToLast(10));
+
+    onChildAdded(logsRef, (snapshot) => {
+      const log = snapshot.val();
+      const li = document.createElement("li");
+      li.textContent = `${log.name} (${log.uid}) - ${log.location} - ${log.time}`;
+      logList.appendChild(li);
+    });
+  </script>
+</body>
+</html>
